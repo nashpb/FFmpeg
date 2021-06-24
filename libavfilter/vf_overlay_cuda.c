@@ -36,8 +36,6 @@
 #include "framesync.h"
 #include "internal.h"
 
-#include "cuda/load_helper.h"
-
 #define CHECK_CU(x) FF_CUDA_CHECK_DL(ctx, ctx->hwctx->internal->cuda_dl, x)
 #define DIV_UP(a, b) ( ((a) + (b) - 1) / (b) )
 
@@ -434,8 +432,8 @@ static int overlay_cuda_query_formats(AVFilterContext *avctx)
  */
 static int overlay_cuda_config_output(AVFilterLink *outlink)
 {
-    extern const unsigned char ff_vf_overlay_cuda_ptx_data[];
-    extern const unsigned int ff_vf_overlay_cuda_ptx_len;
+
+    extern char vf_overlay_cuda_ptx[];
 
     int err;
     AVFilterContext* avctx = outlink->src;
@@ -511,7 +509,7 @@ static int overlay_cuda_config_output(AVFilterLink *outlink)
         return err;
     }
 
-    err = ff_cuda_load_module(ctx, ctx->hwctx, &ctx->cu_module, ff_vf_overlay_cuda_ptx_data, ff_vf_overlay_cuda_ptx_len);
+    err = CHECK_CU(cu->cuModuleLoadData(&ctx->cu_module, vf_overlay_cuda_ptx));
     if (err < 0) {
         CHECK_CU(cu->cuCtxPopCurrent(&dummy));
         return err;

@@ -24,10 +24,7 @@
 #include "internal.h"
 #include "yadif.h"
 
-#include "cuda/load_helper.h"
-
-extern const unsigned char ff_vf_yadif_cuda_ptx_data[];
-extern const unsigned int ff_vf_yadif_cuda_ptx_len;
+extern char vf_yadif_cuda_ptx[];
 
 typedef struct DeintCUDAContext {
     YADIFContext yadif;
@@ -321,7 +318,7 @@ static int config_output(AVFilterLink *link)
     if (ret < 0)
         goto exit;
 
-    ret = ff_cuda_load_module(ctx, s->hwctx, &s->cu_module, ff_vf_yadif_cuda_ptx_data, ff_vf_yadif_cuda_ptx_len);
+    ret = CHECK_CU(cu->cuModuleLoadData(&s->cu_module, vf_yadif_cuda_ptx));
     if (ret < 0)
         goto exit;
 
